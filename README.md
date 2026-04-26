@@ -84,6 +84,7 @@ This system uses **llama3.1:8b** as the single LLM model.
 ---
 
 ## Project Structure
+```
 ai-service-desk/
 │
 ├── docker-compose.yml
@@ -102,7 +103,7 @@ ai-service-desk/
 │
 └── n8n-workflows/
     └── ai_request_classifier.json
-
+```
 ---
 
 ## Prerequisites
@@ -122,13 +123,12 @@ docker compose up -d
 ```
 
 2. Access services
-```
+
 | Service    |	   URL	  |
 |------------|------------|
 | n8n        |	http://localhost:5678  |
 | Open WebUI |	http://localhost:3000  |
 | Ollama     |	http://localhost:11434 |
-```
 
 3. LLM Model Setup (llama3.1:8b)
 
@@ -148,11 +148,10 @@ Or automated
 A lightweight UI to send IT requests to the AI pipeline.
 
 Input Fields
-```
 |   Field   |   Description   |
 |-----------|-----------------|
 | Request Text | User IT request |
-```
+
 ---
 
 ## Example Request
@@ -179,7 +178,9 @@ Input Fields
 ---
 
 ## Environment Variables
+```json
 N8N_ENCRYPTION_KEY=your_secure_key_here
+```
 
 ---
 
