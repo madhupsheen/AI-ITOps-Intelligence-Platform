@@ -92,10 +92,10 @@ AI-ITOps-Intelligence-Platform/
 ├── .env.example
 ├── .gitignore
 │
-├── frontend/
+├── frontend-web/
 │   └── ai_help_desk.html
 │
-├── scripts/
+├── installer-scripts/
 │   └── pull-models.ps1
 │
 ├── ai-prompts/
@@ -115,7 +115,7 @@ docker compose version
 ```
 ---
 
-## Deployment/ Quick Start
+## Deployment/Quick Start
 
 1. Start system
 ```bash
@@ -137,8 +137,8 @@ Pull model manually
 docker exec -it ollama ollama pull llama3.1:8b
 ```
 Or automated
-```bash
-./scripts/pull-models.ps1
+```powershell
+.\installer-scripts\pull-models.ps1
 ```
 
 ---
