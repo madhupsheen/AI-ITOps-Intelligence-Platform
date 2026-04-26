@@ -12,8 +12,8 @@ This system processes IT requests using local AI models and returns structured o
 ---
 
 ## System Flow
-
-User  
+```
+User
 ↓
 HTML Client (Web UI / API / PowerShell)
 ↓  
@@ -26,7 +26,7 @@ AI Processing Layer
 JSON Response  
 ↓  
 Client (html) / Automation / Logs  
-
+```
 ---
 
 ## Purpose of this Project
@@ -85,7 +85,7 @@ This system uses **llama3.1:8b** as the single LLM model.
 
 ## Project Structure
 ```
-ai-service-desk/
+AI-ITOps-Intelligence-Platform/
 │
 ├── docker-compose.yml
 ├── README.md
@@ -134,11 +134,11 @@ docker compose up -d
 
 Pull model manually
 ```bash
-    docker exec -it ollama ollama pull llama3.1:8b
+docker exec -it ollama ollama pull llama3.1:8b
 ```
 Or automated
 ```bash
-    ./scripts/pull-models.ps1
+./scripts/pull-models.ps1
 ```
 
 ---
@@ -178,7 +178,7 @@ Input Fields
 ---
 
 ## Environment Variables
-```json
+```
 N8N_ENCRYPTION_KEY=your_secure_key_here
 ```
 
