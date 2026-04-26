@@ -1,0 +1,198 @@
+{
+  "name": "AI Request Classifier",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-request",
+        "responseMode": "=responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        96
+      ],
+      "id": "1f60e1e8-b1c8-45ee-b136-1a428e88882b",
+      "name": "Webhook",
+      "webhookId": "7d073343-d136-498a-b8e8-d33da3ac4ffe"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "649abe6d-59c9-46d6-ba94-ace45f1af60f",
+              "leftValue": "={{$json.clean_text}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        96
+      ],
+      "id": "4cd0bd4b-d056-481c-af62-5bdd3fdbd489",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"{{$json.ollama_model}}\",\n  \"prompt\": \"You are an IT Service Desk classifier.\\n\\nYou must return ONLY valid JSON.\\n\\nIMPORTANT RULES:\\n- Use ONLY the user request below\\n- Do NOT assume missing information\\n- Do NOT guess or invent details\\n- Do NOT include markdown, code blocks, or explanations\\n- If uncertain, choose \\\"other\\\" and low confidence\\n\\nOUTPUT SCHEMA (must follow exactly):\\n{\\n  \\\"type\\\": \\\"incident|service_request|change|other\\\",\\n  \\\"priority\\\": \\\"low|medium|high\\\",\\n  \\\"summary\\\": \\\"string (1 sentence only)\\\",\\n  \\\"reasoning\\\": \\\"string (1–3 sentences)\\\",\\n  \\\"confidence\\\": number (0 to 1, e.g. 0.87),\\n  \\\"suggested_team\\\": \\\"network|identity|security|endpoint|app|developer|finance|hr|other\\\"\\n}\\n\\nCLASSIFICATION RULES:\\n- incident = something broken or not working\\n- service_request = access or standard request\\n- change = system/config change request\\n- other = unclear or missing context\\n\\nPRIORITY RULES:\\n- high = business/service down or blocking work\\n- medium = degraded or partial impact\\n- low = informational or minor request\\n\\nUSER REQUEST:\\n{{$json.clean_text}}\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -448,
+        192
+      ],
+      "id": "d3800554-a76c-41bf-907e-a9a7b072c6f3",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{\n{\n  \"status\": \"failed\",\n  \"error\": \"Invalid input\"\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -448,
+        0
+      ],
+      "id": "cb59349d-bb58-4194-9f52-d2fbf7eed34c",
+      "name": "Respond to Webhook - Error"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ \n  (() => {\n    const raw = $json.response;\n\n    if (!raw) {\n      return {\n        status: \"failed\",\n        error: \"No AI response\"\n      };\n    }\n\n    const cleaned = raw.replace(/```json|```/g, '').trim();\n    const match = cleaned.match(/\\{[\\s\\S]*?\\}/);\n\n    if (!match) {\n      return {\n        status: \"processed\",\n        error: \"No JSON found\",\n        raw\n      };\n    }\n\n    const parsed = JSON.parse(match[0]);\n\n    return {\n      status: \"processed\",\n      ai_output: parsed\n    };\n  })()\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -224,
+        192
+      ],
+      "id": "23482cf3-d8ea-4808-bea9-33d4c3599559",
+      "name": "Respond to Webhook - Success"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "360e3fbd-62c7-4d5a-abe5-e3778b5de0d5",
+              "name": "ollama_model",
+              "value": "llama3.1:8b",
+              "type": "string"
+            },
+            {
+              "id": "e4cfd31a-56aa-4d46-8519-a8f11a9dff49",
+              "name": "clean_text",
+              "value": "={{$json.body.text\n  ? $json.body.text\n      .replace(/\\r?\\n/g, ' ')\n      .replace(/\\t/g, ' ')\n      .trim()\n  : \"\"\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -896,
+        96
+      ],
+      "id": "1aa73490-b8fb-49e7-8e85-90ca8ee9db5c",
+      "name": "Set field for LLM model name and clean query"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set field for LLM model name and clean query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook - Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set field for LLM model name and clean query": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "de24a881-bae6-4a2c-9b65-9a3599a602fe",
+  "meta": {
+    "instanceId": "abee4112f54205693ac2bba613033692d2a37a0fd41aae99029b7db776dd4df3"
+  },
+  "id": "ggc75KxmeIwQ88QE",
+  "tags": []
+}

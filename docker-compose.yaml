@@ -1,0 +1,120 @@
+# =========================================================
+# AI Service Desk Automation Stack
+# - Ollama (LLM runtime)
+# - Open WebUI (chat interface)
+# - n8n (automation engine)
+# =========================================================
+
+services:
+
+  # =========================================================
+  # Ollama - Local LLM Runtime (Model Server)
+  # =========================================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+
+    ports:
+      - "11434:11434"   # Expose Ollama API to host
+
+    volumes:
+      - ollama_data:/root/.ollama   # Persist downloaded models
+
+    restart: unless-stopped
+
+    networks:
+      - ai_network
+
+    # Health check ensures service is ready before dependent services rely on it
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+
+  # =========================================================
+  # Open WebUI - UI for interacting with Ollama models
+  # =========================================================
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+
+    ports:
+      - "3000:8080"   # Access UI at http://localhost:3000
+
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434   # Internal Docker communication
+
+    depends_on:
+      - ollama   # Ensures Ollama starts first
+
+    restart: unless-stopped
+
+    networks:
+      - ai_network
+
+
+  # =========================================================
+  # n8n - Workflow Automation Engine (AI pipeline orchestration)
+  # =========================================================
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+
+    ports:
+      - "5678:5678"   # Access n8n UI at http://localhost:5678
+
+    environment:
+      # -----------------------------
+      # Core runtime configuration
+      # -----------------------------
+      - NODE_ENV=production
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+
+      # -----------------------------
+      # Security
+      # -----------------------------
+      # Used to encrypt stored credentials inside n8n
+      # MUST be set via .env file (do NOT hardcode)
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+
+      # -----------------------------
+      # Privacy / Telemetry
+      # -----------------------------
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_PERSONALIZATION_ENABLED=false
+
+      # NOTE:
+      # n8n uses built-in user management (owner account)
+      # On first login, you will create your own credentials via UI
+      # No need for N8N_BASIC_AUTH_* variables
+
+    depends_on:
+      - ollama   # Ensures LLM backend is available
+
+    volumes:
+      - n8n_data:/home/node/.n8n   # Persist workflows & credentials
+
+    restart: unless-stopped
+
+    networks:
+      - ai_network
+
+
+# =========================================================
+# Persistent Storage
+# =========================================================
+volumes:
+  ollama_data:   # Stores downloaded LLM models
+  n8n_data:      # Stores workflows, credentials, execution history
+
+
+# =========================================================
+# Internal Network
+# =========================================================
+networks:
+  ai_network:
+    driver: bridge   # Isolated internal communication

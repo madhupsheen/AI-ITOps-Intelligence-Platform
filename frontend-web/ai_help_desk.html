@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Help Desk</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 50px auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+      resize: none;
+      overflow: hidden;
+      min-height: 80px;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff55;
+      border-top: 2px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .response-box {
+      margin-top: 20px;
+      background: #0f172a;
+      color: #00ff9d;
+      padding: 15px;
+      border-radius: 6px;
+      min-height: 80px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🧑‍💼 IT Help Desk Portal</h1>
+  <div class="subtitle">AI-powered request classification system</div>
+
+  <form id="form">
+
+    <label for="text">Send your query</label>
+    <textarea id="text" placeholder="e.g. VPN not working..."></textarea>
+
+    <button type="submit" id="submitBtn">
+      Submit Request
+    </button>
+
+  </form>
+
+  <div class="response-box" id="result">Response will appear here...</div>
+
+</div>
+
+<script>
+let isRequestRunning = false;
+
+const textarea = document.getElementById("text");
+
+textarea.addEventListener("input", function () {
+  this.style.height = "auto";
+  this.style.height = this.scrollHeight + "px";
+});
+
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (isRequestRunning) return;
+
+  const text = document.getElementById("text").value;
+  const resultBox = document.getElementById("result");
+  const button = document.getElementById("submitBtn");
+
+  isRequestRunning = true;
+
+  resultBox.innerText = "";
+
+  button.disabled = true;
+  button.innerHTML = `<span class="spinner"></span>Processing...`;
+
+  try {
+    const res = await fetch("http://localhost:5678/webhook/ai-request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: text
+      })
+    });
+
+    const data = await res.json();
+    resultBox.innerText = JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    resultBox.innerText = "Error: " + err.message;
+  }
+
+  isRequestRunning = false;
+  button.disabled = false;
+  button.innerHTML = "Submit Request";
+});
+</script>
+
+</body>
+</html>
