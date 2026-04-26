@@ -137,8 +137,8 @@ Pull model manually
 docker exec -it ollama ollama pull llama3.1:8b
 ```
 Or automated
-```powershell
-.\installer-scripts\pull-models.ps1
+```bash
+./installer-scripts/pull-models.ps1
 ```
 
 ---
