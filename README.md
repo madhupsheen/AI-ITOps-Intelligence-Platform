@@ -3,7 +3,7 @@
 A self-hosted, AI-powered IT Service Desk automation platform using local LLMs and workflow orchestration.
 (Ollama | n8n | Open WebUI | HTML Client | Docker)
 
-Overview
+**Overview**
 
 This system processes IT service requests using a locally hosted Large Language Model (LLM) and returns structured JSON outputs for automation, triage, and routing.
 
@@ -31,7 +31,7 @@ Client / Automation / Logging Systems
 
 ## Purpose of this Project
 
-This project demonstrates:
+**This project demonstrates:**
 
 - AI workflow orchestration
 - Local LLM deployment (no external APIs)
@@ -44,19 +44,19 @@ This project demonstrates:
 
 ## Architecture Decisions
 
-Why Local LLM (Ollama)
+**Why Local LLM (Ollama)**
 - No external API dependency (privacy-first)
 - No token-based cost model
 - Full control over model execution
 - Offline capability
 
-Why n8n
+**Why n8n**
 - Rapid workflow orchestration
 - Visual pipeline design
 - Faster iteration vs custom backend
 - Easy integration with APIs and automation tools
 
-Why Single Model Architecture
+**Why Single Model Architecture**
 - Eliminates model routing complexity
 - Ensures consistent output format
 - Reduces latency
@@ -68,19 +68,19 @@ Why Single Model Architecture
 
 This system uses llama3.1:8b as the primary model.
 
-Why this model
+**Why this model**
 - Strong instruction-following for structured JSON output
 - Reliable for classification and summarization tasks
 - Lower hallucination compared to smaller models (phi3-mini, gemma-2b)
 - Balanced performance vs resource usage
 - Optimized for local execution via Ollama
 
-Why not larger models
+**Why not larger models**
 - Higher RAM/VRAM requirements
 - Increased latency
 - Not practical for local-first architecture
 
-Why not smaller models
+**Why not smaller models**
 - Lower accuracy in classification
 - Inconsistent structured output
 - Higher error rate in reasoning
@@ -98,7 +98,7 @@ Why not smaller models
 ---
 
 ## Architecture
-```
+
 | Component |	Role |
 |-----------|------|
 | Ollama | Local LLM runtime |
@@ -106,7 +106,7 @@ Why not smaller models
 | Open WebUI | Model testing interface |
 | HTML Client |	Request submission UI |
 | Docker | Container orchestration |
-```
+
 ---
 
 ## Project Structure
@@ -146,14 +146,15 @@ docker compose version
 ```bash
 docker compose up -d
 ```
+
 2. Access services
-```
+
 | Service | URL |
 |---------|-----|
 | n8n | http://localhost:5678 |
 | Open WebUI | http://localhost:3000 |
 | Ollama | http://localhost:11434 |
-```
+
 3. Pull LLM model
 
   a. Manual:
@@ -219,23 +220,23 @@ Expected:
 
 ## Deployment Tradeoffs (Docker vs Native)
 
-Docker Benefits
+**Docker Benefits**
 - Consistent environment
 - Easy setup
 - Service isolation
 - Portability
 
-Docker Considerations
+**Docker Considerations**
 - Higher CPU & RAM overhead
 - Slower startup times
 - Less efficient on low-spec machines
 
-Native Alternative
+**Native Alternative**
 - Run Ollama directly
 - Run n8n via Node.js
 - Serve frontend via lightweight server
 
-When to use native
+**When to use native**
 - Low-resource environments
 - Performance-sensitive setups
 
