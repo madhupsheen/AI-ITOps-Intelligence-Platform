@@ -1,13 +1,15 @@
 # AI Service Desk Automation Stack
 
-A self-hosted AI-powered IT Service Desk automation system using local LLMs and workflow orchestration.
-(Ollama | n8n | Open WebUI | HTML Client)
+A self-hosted, AI-powered IT Service Desk automation platform using local LLMs and workflow orchestration.
+(Ollama | n8n | Open WebUI | HTML Client | Docker)
 
 ---
 
 ## Overview
 
-This system processes IT requests using local AI models and returns structured outputs for automation.
+This system processes IT service requests using a locally hosted Large Language Model (LLM) and returns structured JSON outputs for automation, triage, and routing.
+
+Designed as a foundation for AIOps and intelligent service desk automation, the platform emphasizes privacy, cost efficiency, and extensibility.
 
 ---
 
@@ -17,69 +19,94 @@ User
 ↓
 HTML Client (Web UI / API / PowerShell)
 ↓  
-n8n Webhook (workflow engine)  
+n8n Webhook (Workflow Engine)  
 ↓  
-Ollama (Local LLM inference)  
+Ollama (Local LLM Inference)  
 ↓  
 AI Processing Layer  
 ↓  
-JSON Response  
+Structured JSON Output  
 ↓  
-Client (html) / Automation / Logs  
+Client / Automation / Logging Systems
 ```
 ---
 
 ## Purpose of this Project
 
 This project demonstrates:
-    - DevOps infrastructure design
-    - AI workflow orchestration
-    - Local LLM deployment
-    - API + UI integration
-    - Automation engineering
+
+- AI workflow orchestration
+- Local LLM deployment (no external APIs)
+- DevOps and containerized infrastructure
+- Prompt engineering for structured outputs
+- API + UI integration
+- Automation-first design
 
 ---
 
-## llama3.1:8b Model Selection Rationale
+## Architecture Decisions
 
-This system uses **llama3.1:8b** as the single LLM model.
+### Why Local LLM (Ollama)
+- No external API dependency (privacy-first)
+- No token-based cost model
+- Full control over model execution
+- Offline capability
 
-### Why this model was chosen:
+### Why n8n
+- Rapid workflow orchestration
+- Visual pipeline design
+- Faster iteration vs custom backend
+- Easy integration with APIs and automation tools
 
-- Strong instruction following for structured JSON output
-- Good balance between speed and reasoning quality
-- Stable performance for classification tasks
-- Lower hallucination rate compared to smaller models (phi3-mini, gemma-2b)
-- Efficient enough to run locally via Ollama on consumer hardware
+### Why Single Model Architecture
+- Eliminates model routing complexity
+- Ensures consistent output format
+- Reduces latency
+- Simplifies debugging and maintenance
 
-### Why single model approach:
+---
 
-- Removes routing complexity
-- Improves consistency in classification
-- Reduces latency (no model switching overhead)
-- Simplifies n8n workflow design
-- Easier to maintain and debug
+## LLM Model Selection (llama3.1:8b)
+
+This system uses llama3.1:8b as the primary model.
+
+### Why this model
+- Strong instruction-following for structured JSON output
+- Reliable for classification and summarization tasks
+- Lower hallucination compared to smaller models (phi3-mini, gemma-2b)
+- Balanced performance vs resource usage
+- Optimized for local execution via Ollama
+
+### Why not larger models
+- Higher RAM/VRAM requirements
+- Increased latency
+- Not practical for local-first architecture
+
+### Why not smaller models
+- Lower accuracy in classification
+- Inconsistent structured output
+- Higher error rate in reasoning
+
+---
 
 ## Core Capabilities
-
-- Request classification (incident|change|service_request|other)
-- Priority assignment (low|medium|high)
+- Request classification (incident | service_request | change | other)
+- Priority assignment (low | medium | high)
 - Query summarization
 - Reasoning generation
-- Confidence scoring (0.0 to 1.0)
-- Team routing suggestion (network|identity|security|endpoint|app|developer|finance|hr|other)
+- Confidence scoring (0.0–1.0)
+- Team routing suggestion (network | identity | security | endpoint | app | developer | finance | hr | other)
 
 ---
 
 ## Architecture
-
-| Component    | Role |
-|--------------|------|
-| Ollama       | Local LLM runtime |
-| n8n          | Workflow automation engine |
-| Open WebUI   | Model testing interface |
-| HTML Client  | Request submission UI |
-| Docker       | Container orchestration |
+| Component |	Role |
+|-----------|------|
+| Ollama | Local LLM runtime |
+| n8n | Workflow automation engine |
+| Open WebUI | Model testing interface |
+| HTML Client |	Request submission UI |
+| Docker | Container orchestration |
 
 ---
 
@@ -115,44 +142,113 @@ docker compose version
 ```
 ---
 
-## Deployment/Quick Start
-
-1. Start system
+## Deployment / Quick Start
+1. Start services
 ```bash
 docker compose up -d
 ```
-
 2. Access services
+| Service | URL |
+|---------|-----|
+| n8n | http://localhost:5678 |
+| Open WebUI | http://localhost:3000 |
+| Ollama | http://localhost:11434 |
 
-| Service    |	   URL	  |
-|------------|------------|
-| n8n        |	http://localhost:5678  |
-| Open WebUI |	http://localhost:3000  |
-| Ollama     |	http://localhost:11434 |
-
-3. LLM Model Setup (llama3.1:8b)
-
-Pull model manually
+3. Pull LLM model
+Manual:
 ```bash
 docker exec -it ollama ollama pull llama3.1:8b
 ```
-Or automated
+
+Or automated:
 ```bash
 ./installer-scripts/pull-models.ps1
 ```
 
+## Hardware & Resource Requirements
+
+### Minimum (Functional)
+- CPU: 4 cores
+- RAM: 8 GB (may be unstable)
+- Storage: 15 GB
+- GPU: Not required
+
+Expected:
+- Slow responses (5–15s)
+- Possible instability
+
+### Recommended (Stable)
+- CPU: 6–8 cores
+- RAM: 16 GB
+- Storage: SSD (20+ GB)
+- GPU: Optional
+
+Expected:
+- Response time: 2–6 seconds
+- Stable multi-service execution
+
+### High Performance (Optimized)
+- CPU: 8+ cores
+- RAM: 32 GB+
+- Storage: NVMe SSD
+- GPU: NVIDIA (optional)
+
+Expected:
+- Faster inference (<2–3s)
+- Better concurrency handling
+
 ---
 
-## HTML Test Client
+## Resource Usage Insights
 
-A lightweight UI to send IT requests to the AI pipeline.
+| Component | Usage |
+|-----------|-------|
+| Ollama (LLM) | High CPU & RAM |
+| n8n | Low–Moderate |
+| Open WebUI | Low |
+| Docker | Adds baseline overhead |
 
-Input Fields
-|   Field   |   Description   |
-|-----------|-----------------|
-| Request Text | User IT request |
+## Key Observations
+- LLM is primary resource consumer
+- RAM is critical for stability
+- CPU affects latency
+- Docker introduces overhead vs native execution
 
 ---
+
+## Deployment Tradeoffs (Docker vs Native)
+
+### Docker Benefits
+- Consistent environment
+- Easy setup
+- Service isolation
+- Portability
+
+### Limitations
+- Higher CPU & RAM overhead
+- Slower startup times
+- Less efficient on low-spec machines
+
+### Native Alternative
+- Run Ollama directly
+- Run n8n via Node.js
+- Serve frontend via lightweight server
+
+### When to use native
+- Low-resource environments
+- Performance-sensitive setups
+
+---
+
+## Limitations
+- No RAG (no external knowledge base)
+- Stateless processing (no memory)
+- Limited reasoning vs large cloud models
+- Performance tied to local hardware
+- Not optimized for high concurrency
+- Prompt-based accuracy (no fine-tuning)
+
+--- 
 
 ## Example Request
 ```json
@@ -160,7 +256,6 @@ Input Fields
   "text": "VPN is not working"
 }
 ```
-
 ## Example Response
 ```json
 {
@@ -175,37 +270,44 @@ Input Fields
   }
 }
 ```
----
 
 ## Environment Variables
 ```
 N8N_ENCRYPTION_KEY=your_secure_key_here
 ```
 
----
-
-## Security
-    - Fully local AI execution
-    - No external API dependency
-    - Encrypted n8n credentials
-    - No hardcoded secrets
-
----
+## Security Considerations
+- Fully local AI execution
+- No external API exposure
+- Encrypted n8n credentials
+- No hardcoded secrets
 
 ## Design Principles
-    - Stateless API processing
-    - Structured JSON output only
-    - Modular workflow design
-    - Model-agnostic architecture
-
----
+- Stateless processing
+- Structured JSON output
+- Modular workflow architecture
+- Model-agnostic design
+- Automation-first approach
 
 ## Future Enhancements
-    - Confidence-based routing (auto vs manual triage)
-    - ServiceNow integration
-    - Teams / Email notifications
-    - Azure AD authentication
-    - RAG knowledge base
-    - Observability dashboard
+- RAG (vector database integration)
+- Multi-model routing strategy
+- ServiceNow integration
+- Microsoft Teams / Email alerts
+- Azure AD authentication
+- Observability (Prometheus + Grafana)
+- Kubernetes deployment (AKS / K3s)
+
+## Real-World Use Case
+
+This platform can be used to:
+- Automate IT service desk triage
+- Reduce manual ticket classification
+- Route incidents to correct teams
+- Serve as a foundation for AIOps platforms
 
 ---
+
+## Final Note
+
+This project is designed as a production-oriented prototype, demonstrating how local AI models can be integrated into enterprise-style automation workflows while balancing performance, cost, and architectural simplicity.
