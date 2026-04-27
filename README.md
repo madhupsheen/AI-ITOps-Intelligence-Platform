@@ -3,9 +3,7 @@
 A self-hosted, AI-powered IT Service Desk automation platform using local LLMs and workflow orchestration.
 (Ollama | n8n | Open WebUI | HTML Client | Docker)
 
----
-
-## Overview
+### Overview
 
 This system processes IT service requests using a locally hosted Large Language Model (LLM) and returns structured JSON outputs for automation, triage, and routing.
 
@@ -148,21 +146,23 @@ docker compose version
 docker compose up -d
 ```
 2. Access services
+```
 | Service | URL |
 |---------|-----|
 | n8n | http://localhost:5678 |
 | Open WebUI | http://localhost:3000 |
 | Ollama | http://localhost:11434 |
-
+```
 3. Pull LLM model
-Manual:
+
+  Manual:
 ```bash
-docker exec -it ollama ollama pull llama3.1:8b
+  docker exec -it ollama ollama pull llama3.1:8b
 ```
 
-Or automated:
+  Or automated:
 ```bash
-./installer-scripts/pull-models.ps1
+  ./installer-scripts/pull-models.ps1
 ```
 
 ## Hardware & Resource Requirements
@@ -224,7 +224,7 @@ Expected:
 - Service isolation
 - Portability
 
-### Limitations
+### Docker Considerations
 - Higher CPU & RAM overhead
 - Slower startup times
 - Less efficient on low-spec machines
@@ -240,7 +240,7 @@ Expected:
 
 ---
 
-## Limitations
+## System Limitations
 - No RAG (no external knowledge base)
 - Stateless processing (no memory)
 - Limited reasoning vs large cloud models
